@@ -4,7 +4,6 @@ from textblob import TextBlob
 from nltk.tokenize import word_tokenize
 from nltk.classify import NaiveBayesClassifier
 
-# Constants
 NEWSAPI_KEY = "YOUR_NEWSAPI_KEY"
 NEWSAPI_ENDPOINT = "https://newsapi.org/v2/everything"
 
@@ -35,11 +34,9 @@ def get_sentiment(text):
     else:
         return 'neutral'
 
-# Fetch articles for a ticker
 ticker = input("Enter the stock ticker for which you want to fetch news articles: ")
 articles = fetch_articles(ticker)
 
-# Auto-label the first N articles using TextBlob
 N = 10  # or however many you're comfortable labeling
 print("\nAuto-labeling the first few articles using TextBlob:")
 documents = []
@@ -47,7 +44,6 @@ for i, article in enumerate(articles[:N]):
     label = get_sentiment(article)
     documents.append((word_tokenize(article), label))
 
-# Define a feature extractor
 all_words = nltk.FreqDist(w.lower() for words, sentiment in documents for w in words)
 word_features = list(all_words)[:2000]
 
@@ -58,11 +54,9 @@ def document_features(document):
         features['contains({})'.format(word)] = (word in document_words)
     return features
 
-# Train a classifier using the auto-labeled articles
 featuresets = [(document_features(d), c) for (d, c) in documents]
 classifier = NaiveBayesClassifier.train(featuresets)
 
-# Analyze the remaining articles
 for article in articles[N:]:
     words = word_tokenize(article)
     sentiment = classifier.classify(document_features(words))
